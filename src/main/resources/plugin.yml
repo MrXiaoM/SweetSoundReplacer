@@ -1,0 +1,12 @@
+name: SweetSoundReplacer
+version: '${version}'
+main: top.mrxiaom.sweet.soundreplacer.SweetSoundReplacer
+api-version: 1.13
+depend:
+  - ProtocolLib
+authors: [ MrXiaoM ]
+folia-supported: true
+commands:
+  sweetsoundreplacer:
+    description: 'The main command of SweetSoundReplacer'
+    aliases: [ soundreplacer, ssr ]
