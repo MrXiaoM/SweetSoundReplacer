@@ -1,0 +1,13 @@
+replace-sounds:
+  block.note_block.imitate.creeper:
+    replace-to: 'entity.creeper.primed'
+  block.note_block.imitate.ender_dragon:
+    replace-to: 'entity.ender_dragon.ambient'
+  block.note_block.imitate.piglin:
+    replace-to: 'entity.piglin.ambient'
+  block.note_block.imitate.skeleton:
+    replace-to: 'entity.skeleton.ambient'
+  block.note_block.imitate.wither_skeleton:
+    replace-to: 'entity.wither_skeleton.ambient'
+  block.note_block.imitate.zombie:
+    replace-to: 'entity.zombie.ambient'

@@ -17,10 +17,13 @@ repositories {
     maven("https://repo.helpch.at/releases/")
     maven("https://jitpack.io")
     maven("https://repo.rosewooddev.io/repository/public/")
+    maven("https://libraries.minecraft.net/")
 }
 
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot:1.20.4")
+    compileOnly("com.mojang:datafixerupper:6.0.8")
 
     compileOnly("com.github.dmulloy2:ProtocolLib:5.3.0")
 
