@@ -10,26 +10,30 @@ val targetJavaVersion = 8
 val shadowGroup = "top.mrxiaom.sweet.soundreplacer.libs"
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://repo.helpch.at/releases/")
     maven("https://jitpack.io")
     maven("https://repo.rosewooddev.io/repository/public/")
-    maven("https://libraries.minecraft.net/")
 }
 
+val shadowLink = configurations.create("shadowLink")
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT")
-    compileOnly("org.spigotmc:spigot:1.20.4")
-    compileOnly("com.mojang:datafixerupper:6.0.8")
 
     compileOnly("com.github.dmulloy2:ProtocolLib:5.3.0")
 
     implementation("com.github.technicallycoded:FoliaLib:0.4.4")
     implementation("org.jetbrains:annotations:24.0.0")
     implementation("top.mrxiaom:PluginBase:1.5.4")
+    implementation(project(":nms"))
+    implementation(project(":nms:shared"))
+    for (dependency in project.project(":nms").subprojects) {
+        if (dependency.name.startsWith("v1_")) {
+            add("shadowLink", dependency)
+        }
+    }
 }
 java {
     val javaVersion = JavaVersion.toVersion(targetJavaVersion)
@@ -39,6 +43,7 @@ java {
 }
 tasks {
     shadowJar {
+        configurations.add(shadowLink)
         mapOf(
             "org.intellij.lang.annotations" to "annotations.intellij",
             "org.jetbrains.annotations" to "annotations.jetbrains",

@@ -6,22 +6,14 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import net.minecraft.core.Holder;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.protocol.game.PacketPlayOutEntitySound;
-import net.minecraft.network.protocol.game.PacketPlayOutNamedSoundEffect;
-import net.minecraft.resources.MinecraftKey;
-import net.minecraft.sounds.SoundEffect;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityTypes;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
-import org.bukkit.craftbukkit.v1_20_R3.util.CraftNamespacedKey;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.sweet.soundreplacer.SweetSoundReplacer;
 import top.mrxiaom.sweet.soundreplacer.func.entry.SoundReplacement;
+import top.mrxiaom.sweet.soundreplacer.nms.PacketAPI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,8 +22,11 @@ import java.util.Map;
 public class PacketReplacer extends AbstractModule {
     private final Map<String, SoundReplacement> replacementMap = new HashMap<>();
     private final ProtocolManager protocolManager;
+    private final PacketAPI packetAPI;
+
     public PacketReplacer(SweetSoundReplacer plugin) {
         super(plugin);
+        packetAPI = plugin.getPacketAPI();
         protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new Impl());
     }
@@ -63,36 +58,33 @@ public class PacketReplacer extends AbstractModule {
 
     private void onSendingEntitySound(PacketEvent event, PacketContainer packet) {
         if (packet.getMeta("modified").isPresent()) return;
-        PacketPlayOutEntitySound p = (PacketPlayOutEntitySound) packet.getHandle();
-        SoundEffect soundEffect = p.a().a();
-        NamespacedKey sound = CraftNamespacedKey.fromMinecraft(soundEffect.a());
-        info("发送实体音效 " + sound);
-        SoundReplacement replacement = match(sound);
-        if (replacement != null) {
-            Holder<SoundEffect> holder = Holder.a(SoundEffect.a(new MinecraftKey(replacement.getTarget())));
-            PacketPlayOutEntitySound handle = new PacketPlayOutEntitySound(holder, p.d(), new DummyEntity(p.e()), p.f(), p.g(), p.h());
-            PacketContainer newPacket = new PacketContainer(packet.getType(), handle);
-            newPacket.setMeta("modified", true);
-            info("修改为 " + holder.a().a());
+        PacketContainer newPacket = overridePacket(packet);
+        if (newPacket != null) {
             event.setPacket(newPacket);
         }
     }
 
     private void onSendingNamedSoundEffect(PacketEvent event, PacketContainer packet) {
         if (packet.getMeta("modified").isPresent()) return;
-        PacketPlayOutNamedSoundEffect p = (PacketPlayOutNamedSoundEffect) packet.getHandle();
-        SoundEffect soundEffect = p.a().a();
-        NamespacedKey sound = CraftNamespacedKey.fromMinecraft(soundEffect.a());
-        info("发送音效 " + sound);
-        SoundReplacement replacement = match(sound);
-        if (replacement != null) {
-            Holder<SoundEffect> holder = Holder.a(SoundEffect.a(new MinecraftKey(replacement.getTarget())));
-            PacketPlayOutNamedSoundEffect handle = new PacketPlayOutNamedSoundEffect(holder, p.d(), p.e(), p.f(), p.g(), p.h(), p.i(), p.j());
-            PacketContainer newPacket = new PacketContainer(packet.getType(), handle);
-            newPacket.setMeta("modified", true);
-            info("修改为 " + holder.a().a());
+        PacketContainer newPacket = overridePacket(packet);
+        if (newPacket != null) {
             event.setPacket(newPacket);
         }
+    }
+
+    private PacketContainer overridePacket(PacketContainer packet) {
+        NamespacedKey sound = plugin.getPacketAPI().getPacketSoundEffect(packet);
+        if (sound == null) return null;
+        SoundReplacement replacement = match(sound);
+        if (replacement != null) {
+            Object handle = packetAPI.overrideSound(packet, NamespacedKey.fromString(replacement.getTarget()));
+            if (handle != null) {
+                PacketContainer newPacket = new PacketContainer(packet.getType(), handle);
+                newPacket.setMeta("modified", true);
+                return newPacket;
+            }
+        }
+        return null;
     }
 
     public class Impl extends PacketAdapter {
@@ -125,24 +117,5 @@ public class PacketReplacer extends AbstractModule {
 
     public static PacketReplacer inst() {
         return instanceOf(PacketReplacer.class);
-    }
-
-    public static class DummyEntity extends Entity {
-        public DummyEntity(int id) {
-            super(EntityTypes.aD, null);
-            e(id);
-        }
-
-        @Override
-        protected void c_() {
-        }
-
-        @Override
-        protected void a(NBTTagCompound nbtTagCompound) {
-        }
-
-        @Override
-        protected void b(NBTTagCompound nbtTagCompound) {
-        }
     }
 }

@@ -6,6 +6,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import top.mrxiaom.pluginbase.BukkitPlugin;
 import top.mrxiaom.pluginbase.utils.scheduler.FoliaLibScheduler;
+import top.mrxiaom.sweet.soundreplacer.nms.NMS;
+import top.mrxiaom.sweet.soundreplacer.nms.PacketAPI;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,7 +31,14 @@ public class SweetSoundReplacer extends BukkitPlugin {
         );
         this.scheduler = new FoliaLibScheduler(this);
     }
+    PacketAPI packetAPI;
     YamlConfiguration config;
+
+    @Override
+    protected void beforeLoad() {
+        NMS.init(getLogger());
+        packetAPI = NMS.getPacketAPI();
+    }
 
     @NotNull
     @Override
@@ -38,6 +47,10 @@ public class SweetSoundReplacer extends BukkitPlugin {
             reloadConfig();
         }
         return config;
+    }
+
+    public PacketAPI getPacketAPI() {
+        return packetAPI;
     }
 
     @Override
