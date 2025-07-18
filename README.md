@@ -1,6 +1,6 @@
 # SweetSoundReplacer
 
-Minecraft 音效发包替换插件，支持 Minecraft `1.17.1` - `1.21.7`，需要依赖 ProtocolLib。
+Minecraft 音效发包替换插件，支持 Minecraft `1.17.1` - `1.21.8`，需要依赖 ProtocolLib。
 
 ## 简介
 
